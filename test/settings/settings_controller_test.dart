@@ -1,3 +1,4 @@
+import 'package:assisstant_test/src/app.dart';
 import 'package:assisstant_test/src/settings/settings_controller.dart';
 import 'package:assisstant_test/src/settings/settings_service.dart';
 import 'package:flutter/material.dart';
@@ -22,9 +23,34 @@ void main() {
       final controller = SettingsController(service);
       await controller.loadSettings();
 
-      controller.updateThemeMode(ThemeMode.dark);
+      expect(controller.themeMode, ThemeMode.system);
+      expect(service._themeMode, ThemeMode.system);
+
+      await controller.updateThemeMode(ThemeMode.dark);
       expect(controller.themeMode, ThemeMode.dark);
       expect(service._themeMode, ThemeMode.dark);
+    });
+
+    testWidgets('inform the UI of the value', (WidgetTester tester) async {
+      final controller = SettingsController(FakeSettingsService());
+      await controller.loadSettings();
+      final myApp = MyApp(settingsController: controller);
+
+      await tester.pumpWidget(myApp);
+
+      expect(
+        tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+        ThemeMode.system,
+      );
+
+      await controller.updateThemeMode(ThemeMode.dark);
+
+      await tester.pumpWidget(myApp);
+
+      expect(
+        tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+        ThemeMode.dark,
+      );
     });
   });
 }
